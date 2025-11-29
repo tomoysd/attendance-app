@@ -18,6 +18,8 @@ class CreateUsersTable extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
+            // 一般 or 管理 を区別するカラム
+            $table->string('role', 20)->default('general');
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
