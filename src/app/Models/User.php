@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -41,4 +42,47 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * 一般ユーザーかどうか
+     */
+    public function isGeneral(): bool
+    {
+        return $this->role === 'general';
+    }
+
+    /**
+     * 管理者ユーザーかどうか
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    /**
+     * このユーザーの勤怠一覧
+     * users(1) - attendances(N)
+     */
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
+    /**
+     * このユーザーが申請した勤怠修正申請一覧
+     * users(1) - stamp_correction_requests(N) （申請者として）
+     */
+    public function stampCorrectionRequests()
+    {
+        return $this->hasMany(StampCorrectionRequest::class);
+    }
+
+    /**
+     * このユーザーが承認者として関わった勤怠修正申請一覧
+     * users(1) - stamp_correction_requests(N) （approved_by 経由）
+     */
+    public function approvedStampCorrectionRequests()
+    {
+        return $this->hasMany(StampCorrectionRequest::class, 'approved_by');
+    }
 }
