@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\StampCorrectionBreak;
 
 class StampCorrectionRequest extends Model
 {
@@ -11,7 +12,6 @@ class StampCorrectionRequest extends Model
 
     protected $fillable = [
         'attendance_id',
-        'user_id',
         'requested_clock_in_at',
         'requested_clock_out_at',
         'reason',
@@ -22,7 +22,7 @@ class StampCorrectionRequest extends Model
 
     protected $casts = [
         'requested_clock_in_at' => 'datetime',
-        'requested_clock_out_at'=> 'datetime',
+        'requested_clock_out_at' => 'datetime',
         'approved_at'           => 'datetime',
     ];
 
@@ -33,15 +33,6 @@ class StampCorrectionRequest extends Model
     public function attendance()
     {
         return $this->belongsTo(Attendance::class);
-    }
-
-    /**
-     * 申請したユーザー（一般ユーザー）
-     * stamp_correction_requests(N) - users(1)
-     */
-    public function user()
-    {
-        return $this->belongsTo(User::class);
     }
 
     /**
@@ -63,5 +54,14 @@ class StampCorrectionRequest extends Model
             2       => '却下',
             default => '申請中',
         };
+    }
+
+    /**
+     * 修正後の休憩一覧
+     * stamp_correction_requests(1) - stamp_correction_breaks(N)
+     */
+    public function stampCorrectionBreaks()
+    {
+        return $this->hasMany(StampCorrectionBreak::class);
     }
 }

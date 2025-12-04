@@ -16,10 +16,9 @@ class CreateStampCorrectionRequestsTable extends Migration
         Schema::create('stamp_correction_requests', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('attendance_id');
-            $table->unsignedBigInteger('user_id');
             $table->dateTime('requested_clock_in_at')->nullable();
             $table->dateTime('requested_clock_out_at')->nullable();
-            $table->text('reason');
+            $table->text('reason', 255);
             // ステータス（0:申請中,1:承認,2:却下）
             $table->tinyInteger('status')->default(0);
              // 承認した管理ユーザー
@@ -33,17 +32,9 @@ class CreateStampCorrectionRequestsTable extends Migration
                 ->references('id')->on('attendances')
                 ->onDelete('cascade');
 
-            $table->foreign('user_id')
-                ->references('id')->on('users')
-                ->onDelete('cascade');
-
             $table->foreign('approved_by')
                 ->references('id')->on('users')
                 ->onDelete('set null');
-
-            // インデックス
-            $table->index(['user_id', 'status']);
-            $table->index(['attendance_id']);
         });
     }
 
