@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+// use App\Http\Requests\LoginRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -22,10 +23,28 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         // TODO: LoginRequest でバリデーション
+        $request->validate([
+            'email'    => ['required', 'email'],
+            'password' => ['required'],
+        ]);
 
-        // TODO: 管理者用 guard or role チェックしてログイン
-        // if (Auth::attempt([...]) && Auth::user()->isAdmin()) { ... }
+        $credentials = $request->only('email', 'password');
 
-        return redirect()->route('admin.attendance.index'); // 仮
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            $request->session()->regenerate();
+
+            // roleがadminでなければログアウトさせる
+            if (! Auth::user()->isAdmin()) {
+                Auth::logout();
+                return back()
+                    ->withErrors(['email' => '管理者権限がありません。'])
+                    ->withInput($request->only('email'));
+            }
+
+        return redirect()->route('admin.attendance.index');
+    }
+    return back()
+            ->withErrors(['email' => 'メールアドレスまたはパスワードが正しくありません。'])
+            ->withInput($request->only('email'));
     }
 }

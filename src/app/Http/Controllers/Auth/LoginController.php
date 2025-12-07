@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+// use App\Http\Requests\LoginRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -22,15 +23,22 @@ class LoginController extends Controller
     public function store(Request $request)
     {
         // TODO: LoginRequest に差し替えてバリデーション
+        $request->validate([
+            'email'    => ['required', 'email'],
+            'password' => ['required'],
+        ]);
 
-        // TODO: 認証処理（guard('web') を使う想定）
-        // if (Auth::attempt($request->only('email', 'password'))) {
-        //     $request->session()->regenerate();
-        //     return redirect()->intended(route('attendance.index'));
-        // }
+        $credentials = $request->only('email', 'password');
 
-        // TODO: 失敗時のエラーメッセージ表示
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            $request->session()->regenerate();
 
-        return back(); // 仮
+            // 直前に見ていたページがあればそこへ、なければ勤怠一覧へ
+            return redirect()->intended(route('attendance.index'));
+        }
+
+        return back()
+            ->withErrors(['email' => 'メールアドレスまたはパスワードが正しくありません。'])
+            ->withInput($request->only('email'));
     }
 }

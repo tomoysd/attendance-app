@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\StampCorrectionRequest;
 
@@ -14,9 +13,11 @@ class StampCorrectionRequestController extends Controller
      */
     public function index()
     {
-        // TODO: ログインユーザーの申請一覧を取得
-        // $requests = StampCorrectionRequest::where('user_id', Auth::id())->get();
+        $requests = StampCorrectionRequest::with(['attendance'])
+            ->where('user_id', Auth::id())
+            ->orderByDesc('created_at')
+            ->get();
 
-        return view('stamp_correction_request.index'/*, compact('requests')*/);
+        return view('stamp_correction_request.index', compact('requests'));
     }
 }

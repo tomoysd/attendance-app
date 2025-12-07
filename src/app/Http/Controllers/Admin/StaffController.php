@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\User;
 
 class StaffController extends Controller
@@ -14,8 +13,10 @@ class StaffController extends Controller
     public function index()
     {
         // TODO: 一般ユーザーだけ取得（role = general）
-        // $users = User::where('role', 'general')->get();
+        $users = User::where('role', 'general')
+            ->orderBy('name')
+            ->get();
 
-        return view('admin.staff.index'/*, compact('users')*/);
+        return view('admin.staff.index', compact('users'));
     }
 }

@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Attendance;
 use App\Models\User;
+use Carbon\Carbon;
 
 class AttendanceController extends Controller
 {
@@ -15,9 +15,21 @@ class AttendanceController extends Controller
     public function index()
     {
         // TODO: 月指定で全スタッフの勤怠を取得
-        // $attendances = Attendance::with('user')->get();
+        $month = request('month', Carbon::now()->format('Y-m'));
+        $start = Carbon::parse($month . '-01')->startOfMonth();
+        $end   = $start->copy()->endOfMonth();
 
-        return view('admin.attendance.index'/*, compact('attendances')*/);
+        $attendances = Attendance::with(['user'])
+            ->whereBetween('clock_in_at', [$start, $end])
+            ->orderBy('clock_in_at')
+            ->get();
+
+        return view('admin.attendance.index', [
+            'attendances' => $attendances,
+            'month'       => $month,
+            'start'       => $start,
+            'end'         => $end,
+        ]);
     }
 
     /**
@@ -26,9 +38,10 @@ class AttendanceController extends Controller
     public function show(int $id)
     {
         // TODO: 対象勤怠を取得
-        // $attendance = Attendance::with('user')->findOrFail($id);
+        $attendance = Attendance::with(['user', 'breaks'])
+            ->findOrFail($id);
 
-        return view('admin.attendance.show'/*, compact('attendance')*/);
+        return view('admin.attendance.show', compact('attendance'));
     }
 
     /**
@@ -37,9 +50,23 @@ class AttendanceController extends Controller
     public function staff(int $id)
     {
         // TODO: 対象ユーザーと、そのユーザーの勤怠一覧を取得
-        // $user = User::findOrFail($id);
-        // $attendances = $user->attendances()->get();
+        $user = User::where('role', 'general')->findOrFail($id);
 
-        return view('admin.attendance.staff'/*, compact('user', 'attendances')*/);
+        $month = request('month', Carbon::now()->format('Y-m'));
+        $start = Carbon::parse($month . '-01')->startOfMonth();
+        $end   = $start->copy()->endOfMonth();
+
+        $attendances = $user->attendances()
+            ->whereBetween('clock_in_at', [$start, $end])
+            ->orderBy('clock_in_at')
+            ->get();
+
+        return view('admin.attendance.staff', [
+            'user'        => $user,
+            'attendances' => $attendances,
+            'month'       => $month,
+            'start'       => $start,
+            'end'         => $end,
+        ]);
     }
 }
