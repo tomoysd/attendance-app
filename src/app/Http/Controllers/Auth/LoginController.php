@@ -3,8 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-// use App\Http\Requests\LoginRequest;
-use Illuminate\Http\Request;
+use App\Http\Requests\LoginRequest;
 use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
@@ -20,21 +19,17 @@ class LoginController extends Controller
     /**
      * ログイン処理
      */
-    public function store(Request $request)
+    public function store(LoginRequest $request)
     {
-        // TODO: LoginRequest に差し替えてバリデーション
-        $request->validate([
-            'email'    => ['required', 'email'],
-            'password' => ['required'],
-        ]);
+        $request->validated();
 
         $credentials = $request->only('email', 'password');
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            // 直前に見ていたページがあればそこへ、なければ勤怠一覧へ
-            return redirect()->intended(route('attendance.index'));
+            // 直前に見ていたページがあればそこへ、なければ勤怠画面へ
+            return redirect()->intended(route('attendance.create'));
         }
 
         return back()

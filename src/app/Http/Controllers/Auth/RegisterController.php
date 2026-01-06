@@ -4,10 +4,11 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-// use App\Http\Requests\RegisterRequest; // あとでFormRequestに差し替え
-use Illuminate\Http\Request;
+use App\Http\Requests\RegisterRequest;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+
 
 class RegisterController extends Controller
 {
@@ -22,14 +23,10 @@ class RegisterController extends Controller
     /**
      * 会員登録処理
      */
-    public function store(Request $request)
+    public function store(RegisterRequest $request)
     {
         // TODO: RegisterRequest に差し替えてバリデーション
-        $request->validate([
-            'name'     => ['required', 'string', 'max:255'],
-            'email'    => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-        ]);
+        $request->validated();
 
         // TODO: ユーザー作成処理
         $user = User::create([
@@ -39,10 +36,11 @@ class RegisterController extends Controller
             'role'     => 'general',   // 一般ユーザーとして登録
         ]);
 
+        event(new Registered($user));
         // 登録直後にログイン
         Auth::login($user);
 
-        // TODO: ログインさせて、勤怠画面 or トップへリダイレクト
-        return redirect()->route('attendance.index');
+        // TODO: ログインさせて、勤怠画面
+        return redirect()->route('attendance.create');
     }
 }

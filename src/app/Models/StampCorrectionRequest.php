@@ -65,3 +65,4 @@ class StampCorrectionRequest extends Model
         return $this->hasMany(StampCorrectionBreak::class);
     }
 }
+

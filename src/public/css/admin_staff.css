@@ -1,0 +1,261 @@
+.admin-staff {
+    display: flex;
+    justify-content: center;
+    background: #f2f2f2;
+    min-height: calc(100vh - 80px);
+    padding: 60px 16px;
+}
+
+.admin-staff__inner {
+    max-width: 980px;
+    width: 100%;
+    margin: 0 auto;
+    padding-left: 40px; /* ★ここが基準線 */
+    padding-right: 40px;
+}
+
+.admin-staff__title {
+    max-width: 720px; /* ← 表と同じ幅 */
+    margin: 0 auto 60px;
+    font-size: 22px;
+    font-weight: 700;
+    padding-left: 12px;
+    border-left: 3px solid #333;
+    color: #333;
+}
+
+/* flash / errors（必要なら） */
+.admin-staff__flash {
+    max-width: 720px;
+    margin: 0 auto 12px auto;
+    padding: 12px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.admin-staff__flash--success {
+    background: #eefaf0;
+    border: 1px solid #bfe7c6;
+}
+
+.admin-staff__errors {
+    max-width: 720px;
+    margin: 0 auto 14px auto;
+    padding: 12px 14px;
+    border-radius: 6px;
+    background: #fff4f4;
+    border: 1px solid #f0b4b4;
+    font-size: 14px;
+}
+
+.admin-staff__errors ul {
+    margin: 0;
+    padding-left: 18px;
+}
+
+/* table */
+.admin-staff__table-wrap {
+    max-width: 720px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.admin-staff__table {
+    width: 720px;
+    max-width: 100%;
+    margin: 0;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.admin-staff__th,
+.admin-staff__td {
+    border-bottom: 1px solid #f2f2f2;
+    padding: 12px 10px;
+    font-size: 16px;
+    color: #737373;
+}
+
+.admin-staff__th {
+    border-bottom: 3px solid #f2f2f2;
+    font-weight: 700;
+    text-align: center;
+    background: #fff;
+}
+
+.admin-staff__td--name,
+.admin-staff__td--email {
+    text-align: center;
+    font-weight: 700;
+}
+
+.admin-staff__td--link {
+    text-align: center;
+}
+
+.admin-staff__detail-link {
+    display: inline-block;
+    text-decoration: none;
+    font-weight: 700;
+    color: #333;
+    padding: 6px 10px;
+    border-radius: 4px;
+}
+
+.admin-staff__detail-link:hover {
+    opacity: 0.85;
+    transition: 0.2s;
+}
+
+.admin-staff__td--empty {
+    text-align: center;
+    padding: 18px 10px;
+    color: #666;
+}
+
+/* スタッフ別勤怠一覧画面 */
+
+.admin-staff-attendance {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 24px 18px 40px;
+}
+
+.page-title {
+    font-size: 30px;
+    font-weight: 700;
+    margin: 0 0 32px;
+    padding-left: 10px;
+    border-left: 3px solid #111;
+}
+
+/* 月ナビ */
+.month-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: #fff;
+    border: 1px solid #fff;
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin-bottom: 32px;
+}
+
+.month-nav__btn {
+    display: inline-block;
+    padding: 10px 14px;
+    color: #737373;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.month-nav__btn:hover {
+    opacity: 0.85;
+    transition: 0.2s;
+}
+
+.month-nav__center {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    color: #111;
+}
+
+.month-nav__ym {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+/* テーブル */
+.table-wrap {
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.attendance-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.attendance-table thead th {
+    background: #fff;
+    color: #737373;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 12px 10px;
+    border-bottom: 3px solid #e1e1e1;
+    text-align: center;
+}
+
+.attendance-table tbody td {
+    padding: 12px 10px;
+    border-bottom: 2px solid #e1e1e1;
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+    color: #737373;
+}
+
+.attendance-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.col-date {
+    width: 24%;
+    text-align: left;
+    padding-left: 14px;
+}
+.col-time {
+    width: 14%;
+}
+.col-detail {
+    width: 10%;
+}
+
+.detail-link {
+    color: #000;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.detail-link:hover {
+    text-decoration: underline;
+}
+
+.detail-link--disabled {
+    color: #999;
+    font-weight: 700;
+}
+
+/* CSVボタン */
+.csv-area {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 32px;
+}
+
+.csv-btn {
+    display: inline-block;
+    min-width: 140px;
+    text-align: center;
+    padding: 12px 16px;
+    background: #111;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 22px;
+}
+
+.csv-btn:hover {
+    opacity: 0.85;
+    transition: 0.2s;
+}

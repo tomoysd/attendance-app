@@ -8,7 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -68,14 +68,6 @@ class User extends Authenticatable
         return $this->hasMany(Attendance::class);
     }
 
-    /**
-     * このユーザーが申請した勤怠修正申請一覧
-     * users(1) - stamp_correction_requests(N) （申請者として）
-     */
-    public function stampCorrectionRequests()
-    {
-        return $this->hasMany(StampCorrectionRequest::class);
-    }
 
     /**
      * このユーザーが承認者として関わった勤怠修正申請一覧

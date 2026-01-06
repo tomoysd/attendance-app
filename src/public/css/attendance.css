@@ -1,0 +1,224 @@
+/* カード全体 */
+.attendance-card {
+    max-width: 800px;
+    margin: 40px auto 0;
+    padding: 40px 80px;
+    background-color: #f2f2f2;
+}
+
+.attendance-card__inner {
+    background-color: #f2f2f2;
+    padding: 60px 40px 70px;
+    text-align: center;
+}
+
+/* 状態ラベル（出勤前 / 勤務中 / 休憩中 / 退勤後） */
+.attendance-chip {
+    display: inline-block;
+    padding: 6px 16px;
+    font-size: 18px;
+    font-weight: 700;
+    border-radius: 999px;
+    background-color: #C8C8C8;
+    color: #696969;
+    margin-bottom: 24px;
+}
+
+/* 日付 */
+.attendance-date {
+    font-size: 40px;
+    font-weight: 400;
+    margin: 0 0 20px;
+    color: #000;
+}
+
+/* 時刻 */
+.attendance-time {
+    font-size: 80px;
+    font-weight: 700;
+    margin: 0 0 40px;
+    letter-spacing: 2px;
+}
+
+/* メッセージ（退勤後） */
+.attendance-message {
+    text-align: center;
+    margin-top: 64px;
+    font-size: 26px;
+    font-weight: 700;
+    color: #000;
+}
+
+/* ボタンエリア */
+.attendance-actions {
+    display: flex;
+    gap: 32px;
+    justify-content: center;
+    align-items: center;
+}
+
+/* メインボタン（出勤 / 退勤 / 休憩戻） */
+.attendance-button {
+    display: inline-block;
+    min-width: 180px;
+    padding: 12px 0;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-size: 32px;
+    font-weight: 700;
+}
+
+.attendance-button--primary {
+    background-color: #111;
+    color: #fff;
+}
+
+.attendance-button--primary:hover {
+    opacity: 0.85;
+}
+
+/* 勤務中の 退勤ボタン＋休憩入リンクの配置 */
+.attendance-form-main,
+.attendance-form-sub {
+    margin-top: 0;
+}
+
+/* 休憩入リンク風ボタン */
+.attendance-link-button {
+    background-color: #fff;
+    color: #111;
+}
+
+.attendance-link-button:hover {
+    opacity: 0.7;
+}
+
+/* =========================
+    申請一覧（stamp_correction_request/index）
+========================= */
+.req-page {
+    width: 100%;
+    padding: 48px 16px 80px;
+}
+
+.req-card {
+    width: min(920px, 100%);
+    margin: 0 auto;
+    background: #f2f2f2;
+    padding: 40px 32px 34px;
+}
+
+.req-title {
+    font-size: 30px;
+    font-weight: 700;
+    color: #000;
+    margin-bottom: 32px;
+    padding-left: 12px;
+    border-left: 8px solid #000;
+}
+
+
+/* tabs */
+.req-tabs {
+    display: flex;
+    justify-content: left;
+    gap: 56px;
+    margin: 32px 0 56px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #cfcfcf;
+}
+
+.req-tab {
+    display: inline-block;
+    font-size: 16px;
+    font-weight: 700;
+    color: #000;
+    text-decoration: none;
+    padding: 8px 16px;
+    position: relative;
+}
+
+.req-tab.is-active {
+    color: #222;
+}
+
+.req-tab.is-active::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -11px;
+    height: 2px;
+    background: #222;
+}
+
+/* table */
+.req-table-wrap {
+    background: #fff;
+    border-radius: 10px;
+    overflow-x: auto;
+}
+
+.req-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 680px; /* iPhone横スクロール対策 */
+    background: transparent;
+}
+
+
+
+.req-th {
+    background: #fff;
+    color: #737373;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 12px 10px;
+    border-bottom: 3px solid #e1e1e1;
+    text-align: center;
+}
+.req-td {
+    padding: 12px 10px;
+    border-bottom: 2px solid #e1e1e1;
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+    color: #737373;
+}
+
+.req-td--reason {
+    min-width: 180px;
+}
+
+.req-th--detail,
+.req-td--detail {
+    width: 70px;
+}
+
+.req-td--status {
+    color: #666;
+    font-weight: 700;
+}
+
+.req-tr:hover {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.req-detail-link {
+    display: inline-block;
+    font-weight: 700;
+    color: #222;
+    text-decoration: none;
+}
+
+.req-detail-link:hover {
+    text-decoration: underline;
+}
+
+.req-empty {
+    padding: 22px 10px;
+    text-align: center;
+    color: #777;
+    font-size: 13px;
+}

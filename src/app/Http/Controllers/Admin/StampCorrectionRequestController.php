@@ -16,12 +16,20 @@ class StampCorrectionRequestController extends Controller
      */
     public function index()
     {
-        // TODO: 申請中のものを中心に一覧取得
-        $requests = StampCorrectionRequest::with(['attendance.user'])
+        // 承認待ち（未承認）
+        $pendingRequests = StampCorrectionRequest::with(['attendance.user'])
+            ->where('status', 0) // 0: 承認待ち（※あなたの設計に合わせて必要なら変更）
             ->orderByDesc('created_at')
             ->get();
 
-        return view('admin.stamp_correction_request.index', compact('requests'));
+        // 承認済み
+        $approvedRequests = StampCorrectionRequest::with(['attendance.user'])
+            ->where('status', 1) // 1: 承認済み（※あなたの設計に合わせて必要なら変更）
+            ->orderByDesc('approved_at')
+            ->orderByDesc('created_at')
+            ->get();
+
+        return view('admin.stamp_correction_request.index', compact('pendingRequests', 'approvedRequests'));
     }
 
     /**
@@ -31,10 +39,10 @@ class StampCorrectionRequestController extends Controller
     {
         // TODO: 対象申請を取得
         $request = StampCorrectionRequest::with([
-                'attendance.breaks',
-                'stampCorrectionBreaks',
-                'user',
-            ])
+            'attendance.user',
+            'attendance.breaks',
+            'stampCorrectionBreaks',
+        ])
             ->findOrFail($attendance_correct_request_id);
 
         return view('admin.stamp_correction_request.edit', compact('request'));

@@ -1,0 +1,94 @@
+.admin-attendance {
+    background: #f2f2f2;
+    min-height: calc(100vh - 80px);
+    padding: 60px 16px;
+}
+/* 中央寄せ */
+.admin-attendance__inner {
+    max-width: 980px;
+    margin: 0 auto;
+}
+.admin-attendance__title {
+    font-size: 30px;
+    font-weight: 700;
+    margin: 0 0 26px 0;
+    padding-left: 12px;
+    border-left: 8px solid #000;
+    color: #000;
+}
+
+.admin-attendance__nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin: 12px 0 32px;
+}
+
+.admin-attendance__nav-link {
+    text-decoration: none;
+    color: #737373;
+    font-weight: 700;
+    font-size: 16px;
+}
+.admin-attendance__nav-link:hover {
+    opacity: 0.8;
+    transition: 0.2s;
+}
+.admin-attendance__date {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font-weight: 700;
+    font-size: 20px;
+    color: #000;
+}
+/* .admin-attendance__date-icon {
+    display: inline-block;
+    transform: translateY(1px);
+} */
+.admin-attendance__table-wrap {
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.admin-attendance__table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-attendance__table th {
+    background: #fff;
+    font-weight: 700;
+    font-size: 16px;
+    color: #737373;
+    text-align: center;
+    padding: 12px 10px;
+    border-bottom: 3px solid #E1E1E1;
+}
+.admin-attendance__table td {
+    text-align: center;
+    padding: 12px 10px;
+    border-bottom: 2px solid #E1E1E1;
+    font-size: 16px;
+    font-weight: 700;
+    color: #737373;
+}
+
+.admin-attendance__detail-link {
+    text-decoration: none;
+    font-weight: 700;
+    color: #111;
+}
+.admin-attendance__detail-link:hover {
+    text-decoration: underline;
+}
+
+.admin-attendance__detail-link--disabled {
+    color: #999;
+}
+

@@ -17,7 +17,7 @@ class CreateBreaksTable extends Migration
             $table->id();
             $table->unsignedBigInteger('attendance_id');
             $table->dateTime('break_start_at');
-            $table->dateTime('break_end_at');
+            $table->dateTime('break_end_at')->nullable();
             $table->timestamps();
 
             //外部キー

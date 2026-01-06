@@ -17,8 +17,8 @@ class CreateAttendancesTable extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->dateTime('clock_in_at');
-            $table->dateTime('clock_out_at');
-            $table->text('memo', 255)->nullable();
+            $table->dateTime('clock_out_at')->nullable();
+            $table->text('memo')->nullable();
             $table->timestamps();
 
             // 外部キー

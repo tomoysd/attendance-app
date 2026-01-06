@@ -14,7 +14,7 @@ class StaffController extends Controller
     {
         // TODO: 一般ユーザーだけ取得（role = general）
         $users = User::where('role', 'general')
-            ->orderBy('name')
+            ->orderBy('id' , 'asc')
             ->get();
 
         return view('admin.staff.index', compact('users'));

@@ -1,0 +1,84 @@
+/* ===== ログイン後ヘッダー ===== */
+
+.app-body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial,
+        "Hiragino Kaku Gothic ProN", "メイリオ", sans-serif;
+    background-color: #f2f2f2;
+}
+
+/* 黒いバー全体 */
+.app-header {
+    background-color: #111;
+    color: #fff;
+    height: 70px; /* auth と同じ高さに */
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+}
+
+/* 中央寄せ + ロゴとタブを横並び */
+.app-header__inner {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+/* ロゴ */
+.app-header__logo-link {
+    display: inline-block;
+}
+
+.app-header__logo img {
+    display: block;
+    height: 26px; /* ロゴの高さは好みで微調整 */
+}
+
+/* タブナビ */
+.app-header__nav {
+    margin-left: auto; /* ロゴの反対側（右寄せ）に配置 */
+}
+
+.app-header__nav-list {
+    display: flex;
+    list-style: none;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+}
+
+.app-header__nav-item {
+    margin-left: 24px;
+}
+
+/* 通常タブ */
+.app-header__nav-link {
+    color: #fff;
+    font-size: 24px;
+    font-weight: 700;
+    text-decoration: none;
+    padding-bottom: 4px; /* 下線用の余白 */
+}
+
+/* 「ボタン扱い」のログアウト */
+.app-header__nav-link--button {
+    padding-bottom: 4px;
+    line-height: 1;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+/* アクティブタブ（下線） */
+.app-header__nav-item.is-active .app-header__nav-link {
+    border-bottom: 2px solid #fff;
+}
+
+/* メインコンテンツ */
+.app-main {
+    max-width: 1000px;
+    margin: 32px auto 40px;
+    padding: 0 24px;
+}

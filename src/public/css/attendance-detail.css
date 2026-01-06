@@ -1,0 +1,201 @@
+.att-detail-page {
+    background: #fff;
+    border-radius: 10px;
+}
+
+.att-detail-card {
+    margin: 0 auto;
+}
+
+.att-detail-title {
+    font-size: 30px;
+    font-weight: 700;
+    color: #000;
+    margin-bottom: 32px;
+    padding-left: 12px;
+    border-left: 8px solid #000;
+}
+
+/* alerts */
+.alert {
+    padding: 10px 12px;
+    margin: 12px 0;
+    font-size: 18px;
+    font-weight: 800;
+    color: #ff000080;
+}
+
+.alert-warning-top {
+    text-align: left;
+}
+.alert-warning {
+    text-align: right;
+}
+.alert-danger {
+    background: #f2f2f2;
+}
+.alert ul {
+    margin: 0;
+    padding-left: 18px;
+}
+
+.att-table {
+    border-bottom: 2px solid #e1e1e1;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 40px 0 14px;
+    --time-w: 160px; /* .att-time の幅 */
+    --range-gap: 12px; /* .att-td--range の gap */
+    --tilde-w: 24px; /* 「〜」のだいたいの幅（微調整用） */
+    --range-w: calc(var(--time-w) * 2 + var(--range-gap) * 2 + var(--tilde-w));
+}
+
+.att-row {
+    padding: 16px;
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    border-bottom: 1px solid #e5e7eb;
+}
+.att-row:last-child {
+    border-bottom: none;
+}
+
+.att-th {
+    background: #fff;
+    padding: 16px 14px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #737373;
+    display: flex;
+    align-items: center;
+}
+
+.att-td {
+    padding: 14px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.att-td--text {
+    font-weight: 700;
+    font-size: 16px;
+    justify-content: center;
+}
+
+.att-td--date {
+    width: var(--range-w);
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    padding: 10px 0;
+}
+.att-date-year,
+.att-date-md {
+    margin: 0;
+    min-width: auto;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.att-td--range {
+    width: var(--range-w);
+    max-width: 100%;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.att-time {
+    width: 160px;
+    padding: 10px 12px;
+    border: 1px solid #e1e1e1;
+    border-radius: 4px;
+    background: #fff;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: #000;
+}
+
+.att-range-tilde {
+    font-size: 16px;
+    font-weight: 700;
+    color: #000;
+}
+
+.att-td--memo {
+    display: flex;
+    justify-content: center;
+}
+
+.att-td--memo .att-memo {
+    width: var(--range-w);
+    max-width: 100%;
+}
+
+.att-memo {
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 700;
+    resize: vertical;
+}
+
+.att-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 18px;
+}
+
+.btn-fix {
+    background: #000;
+    color: #fff;
+    border-radius: 6px;
+    padding: 10px 22px;
+    font-size: 22px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.btn-fix:disabled,
+.att-time:disabled,
+.att-memo:disabled{
+    border: none;
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+.att-memo:disabled {
+    text-align: left;
+    color: #000;
+    background: #fff;
+    border: none;
+}
+
+/* （任意）スマホで溢れるなら幅を縮める */
+@media (max-width: 480px) {
+    .att-table {
+        --time-w: 120px;
+    }
+    .att-time {
+        width: var(--time-w);
+    }
+}
+
+/* 表示専用の時刻（inputっぽく見せる） */
+.att-time--static {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 160px; /* .att-time と同じに */
+    padding: 10px 12px;
+    background: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    color: #000;
+    border: none;
+}
