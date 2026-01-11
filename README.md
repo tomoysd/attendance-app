@@ -66,7 +66,7 @@ php artisan db:seed
 - mailhog: http://localhost:8025/
 
 
-##　テストアカウント
+## テストアカウント
 |name|email|password|
 |---|---|---|
 |管理者|admin@example.com|password|
