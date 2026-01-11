@@ -33,7 +33,7 @@ class LoginController extends Controller
         }
 
         return back()
-            ->withErrors(['email' => 'メールアドレスまたはパスワードが正しくありません。'])
+            ->withErrors(['email' => 'ログイン情報が登録されていません'])
             ->withInput($request->only('email'));
     }
 }

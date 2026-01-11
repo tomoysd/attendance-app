@@ -24,30 +24,54 @@ class AttendanceController extends Controller
 
         try {
             $targetDate = Carbon::parse($dateStr)->startOfDay();
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             $targetDate = now()->startOfDay();
         }
 
-        // 全ユーザー + 対象日の勤怠（clock_in_at の日付で判定）
+        $date = $targetDate->toDateString();
+
+        // 全ユーザー + 対象日の勤怠を取得（clock_in_at の日付で判定）
+        // さらに：勤怠に紐づく申請（承認待ち/承認済み）と、申請休憩も一緒に読む
         $users = User::query()
             ->orderBy('id')
-            ->with(['attendances' => function ($q) use ($targetDate) {
-                $q->whereDate('clock_in_at', $targetDate->toDateString())
-                    ->with('breaks'); // 休憩時間など計算したいなら
+            ->with(['attendances' => function ($q) use ($date) {
+                $q->whereDate('clock_in_at', $date)
+                    ->with([
+                        'breaks',
+                        'stampCorrectionRequests' => function ($rq) {
+                            $rq->latest('created_at')
+                                ->with(['stampCorrectionBreaks' => fn($bq) => $bq->orderBy('break_start_at')]);
+                        },
+                    ]);
             }])
             ->get();
 
-        // 画面表示用に整形（勤怠が無い/未退勤は空白）
         $rows = $users->map(function ($user) {
             $attendance = $user->attendances->first(); // その日の勤怠（なければ null）
 
+            // 勤怠がない日は空行
+            if (!$attendance) {
+                return [
+                    'user_name'      => $user->name,
+                    'clock_in_at'    => null,
+                    'clock_out_at'   => null,
+                    'break_hm'       => '',
+                    'total_hm'       => '',
+                    'attendance_id'  => null,
+                ];
+            }
+
+            // 表示用の出退勤は「有効値」を使う（申請があれば申請、なければ通常）
+            $ci = $attendance->effectiveClockInAt();
+            $co = $attendance->effectiveClockOutAt();
+
             return [
-                'user_name' => $user->name,
-                'clock_in_at' => $attendance?->clock_in_at,
-                'clock_out_at' => $attendance?->clock_out_at,
-                'break_hm' => $attendance ? $attendance->break_hm : '',
-                'total_hm' => $attendance ? $attendance->total_hm : '',
-                'attendance_id' => $attendance?->id,
+                'user_name'     => $user->name,
+                'clock_in_at'   => $ci?->format('H:i'),
+                'clock_out_at'  => $co?->format('H:i'),
+                'break_hm'      => $attendance->break_hm, // モデル側で「有効休憩」を計算
+                'total_hm'      => $attendance->total_hm, // モデル側で「有効合計」を計算
+                'attendance_id' => $attendance->id,
             ];
         });
 
@@ -69,17 +93,31 @@ class AttendanceController extends Controller
         $attendance->load([
             'user',
             'breaks' => fn($q) => $q->orderBy('break_start_at'),
-            'stampCorrectionRequests' => fn($q) => $q->latest('created_at'),
         ]);
         // 承認待ち（status=0）の申請を1件取得（最新）
         $pendingRequest = $attendance->stampCorrectionRequests()
             ->where('status', 0)
             ->latest('created_at')
-            // ↓ 申請側に休憩のリレーションがあるなら読み込む（名前は要調整）
+            // ↓ 申請側に休憩のリレーションがあるなら読み込む
             ->with(['stampCorrectionBreaks' => fn($q) => $q->orderBy('break_start_at')])
             ->first();
 
-        $isLocked = (bool) $pendingRequest;
+        $approvedRequest = $attendance->stampCorrectionRequests()
+            ->where('status', 1)
+            ->latest('created_at')
+            ->with(['stampCorrectionBreaks' => fn($q) => $q->orderBy('break_start_at')])
+            ->first();
+
+        // 状態を分ける
+        $hasPending  = (bool) $pendingRequest;
+        $hasApproved = (bool) $approvedRequest;
+
+        // 表示は「承認済み優先」→なければ承認待ち→なければ通常
+        $activeRequest = $approvedRequest ?? $pendingRequest;
+
+        //  編集不可の判定：承認待ち or 承認済み ならロック
+        $isLocked = $hasPending || $hasApproved;
+
 
         // 日付表示（勤怠ベースでOK：申請でも同日想定）
         $base = $attendance->clock_in_at ?? $attendance->created_at;
@@ -88,25 +126,20 @@ class AttendanceController extends Controller
         $mdText   = $date->format('n月j日');
 
         // ===== 表示用の値を「どっちから取るか」分岐 =====
-        if ($isLocked) {
+        if ($activeRequest) {
             // 承認待ち：申請内容を表示
-            $clockIn  = $pendingRequest->requested_clock_in_at ? Carbon::parse($pendingRequest->requested_clock_in_at)->format('H:i') : '';
-            $clockOut = $pendingRequest->requested_clock_out_at ? Carbon::parse($pendingRequest->requested_clock_out_at)->format('H:i') : '';
-            $memo     = $pendingRequest->reason ?? '';
+            $clockIn  = $activeRequest->requested_clock_in_at ? Carbon::parse($activeRequest->requested_clock_in_at)->format('H:i') : '';
+            $clockOut = $activeRequest->requested_clock_out_at ? Carbon::parse($activeRequest->requested_clock_out_at)->format('H:i') : '';
+            $memo     = $activeRequest->reason ?? '';
 
             // 申請側の休憩（リレーション名 breaks は要調整の可能性あり）
-            $breakRows = collect($pendingRequest->stampCorrectionBreaks ?? [])->map(function ($b) {
+            $breakRows = collect($activeRequest->stampCorrectionBreaks ?? [])->map(function ($b) {
                 return [
                     'id'    => $b->id,
                     'start' => $b->break_start_at ? Carbon::parse($b->break_start_at)->format('H:i') : '',
                     'end'   => $b->break_end_at   ? Carbon::parse($b->break_end_at)->format('H:i') : '',
                 ];
             })->values()->toArray();
-
-            // 表示が空にならない対策（1行は出す）
-            if (count($breakRows) === 0) {
-                $breakRows[] = ['id' => null, 'start' => '', 'end' => ''];
-            }
         } else {
             // 申請なし：通常勤怠を表示（編集可）
             $clockIn  = $attendance->clock_in_at ? Carbon::parse($attendance->clock_in_at)->format('H:i') : '';
@@ -130,6 +163,8 @@ class AttendanceController extends Controller
         return view('admin.attendance.show', compact(
             'attendance',
             'isLocked',
+            'hasPending',
+            'hasApproved',
             'yearText',
             'mdText',
             'clockIn',
@@ -222,7 +257,11 @@ class AttendanceController extends Controller
         $end   = $base->copy()->endOfMonth();
 
         // 対象月の勤怠（clock_in_atがその月のもの）
-        $attendances = Attendance::with('breaks')
+        $attendances = Attendance::with([
+            'breaks',
+            'latestApprovedCorrectionRequest.breaks',
+            'latestPendingCorrectionRequest',         // （ロック表示にも使える）
+        ])
             ->where('user_id', $user->id)
             ->whereNotNull('clock_in_at')
             ->whereBetween('clock_in_at', [$start->copy()->startOfDay(), $end->copy()->endOfDay()])
@@ -243,22 +282,8 @@ class AttendanceController extends Controller
             $clockIn  = $attendance?->clock_in_at ? Carbon::parse($attendance->clock_in_at)->format('H:i') : '';
             $clockOut = $attendance?->clock_out_at ? Carbon::parse($attendance->clock_out_at)->format('H:i') : '';
 
-            $breakMinutes = 0;
-            if ($attendance) {
-                foreach ($attendance->breaks as $br) {
-                    if ($br->break_start_at && $br->break_end_at) {
-                        $breakMinutes += Carbon::parse($br->break_start_at)->diffInMinutes(Carbon::parse($br->break_end_at));
-                    }
-                }
-            }
-
-            $breakHm = $attendance ? $this->minutesToHm($breakMinutes) : '';
-
-            $totalHm = '';
-            if ($attendance && $attendance->clock_in_at && $attendance->clock_out_at) {
-                $workMinutes = Carbon::parse($attendance->clock_in_at)->diffInMinutes(Carbon::parse($attendance->clock_out_at));
-                $totalHm = $this->minutesToHm(max(0, $workMinutes - $breakMinutes));
-            }
+            $breakHm = $attendance ? $attendance->breakHm() : '';
+            $totalHm = $attendance ? $attendance->totalHm() : '';
 
             $days[] = [
                 'date' => $d->copy(),          // Carbon

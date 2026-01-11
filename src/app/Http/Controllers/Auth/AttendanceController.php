@@ -206,12 +206,19 @@ class AttendanceController extends Controller
         $start = $month->copy()->startOfMonth();
         $end   = $month->copy()->endOfMonth();
 
-        // clock_in_at が datetime なので、月の範囲で取得（自分の分だけ）
-        $attendances = Attendance::with(['breaks'])
+        // 月の範囲で取得（自分の分だけ） + 休憩 + 申請 + 申請休憩 を eager load
+        $attendances = Attendance::query()
             ->where('user_id', Auth::id())
             ->whereBetween('clock_in_at', [
                 $start->copy()->startOfDay(),
                 $end->copy()->endOfDay(),
+            ])
+            ->with([
+                'breaks',
+                'stampCorrectionRequests' => function ($rq) {
+                    $rq->latest('created_at')
+                        ->with(['stampCorrectionBreaks' => fn($bq) => $bq->orderBy('break_start_at')]);
+                },
             ])
             ->get();
 
@@ -226,47 +233,29 @@ class AttendanceController extends Controller
             $key = $date->toDateString();
             $attendance = $byDate->get($key);
 
-            $startText = $attendance?->clock_in_at ? Carbon::parse($attendance->clock_in_at)->format('H:i') : null;
-            $endText   = $attendance?->clock_out_at ? Carbon::parse($attendance->clock_out_at)->format('H:i') : null;
-
-            // ---- 休憩合計（breaksの合計分） ----
-            $breakMinutes = 0;
-
-            if ($attendance) {
-                foreach ($attendance->breaks as $br) {
-                    if ($br->break_start_at && $br->break_end_at) {
-                        $breakMinutes += Carbon::parse($br->break_start_at)
-                            ->diffInMinutes(Carbon::parse($br->break_end_at));
-                    }
-                }
+            if (!$attendance) {
+                $calendar[] = [
+                    'date'          => $date,
+                    'start'         => null,
+                    'end'           => null,
+                    'break'         => null,
+                    'total'         => null,
+                    'attendance_id' => null,
+                ];
+                continue;
             }
 
-            $breakText = $breakMinutes > 0
-                ? sprintf('%d:%02d', intdiv($breakMinutes, 60), $breakMinutes % 60)
-                : null;
-
-            // ---- 合計（出勤〜退勤 − 休憩） ----
-            $totalText = null;
-
-            if ($attendance?->clock_in_at && $attendance?->clock_out_at) {
-                $workMinutes = Carbon::parse($attendance->clock_in_at)
-                    ->diffInMinutes(Carbon::parse($attendance->clock_out_at));
-
-                $netMinutes = max(0, $workMinutes - $breakMinutes); // マイナス防止
-
-                $totalText = sprintf('%d:%02d', intdiv($netMinutes, 60), $netMinutes % 60);
-            }
-
+            // ★表示は「有効値」で統一（申請があれば申請、秒を落として1分ズレ防止）
+            $ci = $attendance->effectiveClockInAt();
+            $co = $attendance->effectiveClockOutAt();
 
             $calendar[] = [
-                'date' => $date,
-                'start' => $startText,
-                'end' => $endText,
-                'break' => $breakText,
-                'total' => $totalText,
-
-                // ★詳細遷移用（/attendance/detail/{id}）
-                'attendance_id' => $attendance?->id,
+                'date'          => $date,
+                'start'         => $ci?->format('H:i'),
+                'end'           => $co?->format('H:i'),
+                'break'         => $attendance->break_hm, // 有効休憩
+                'total'         => $attendance->total_hm, // 有効合計（出退勤-休憩）
+                'attendance_id' => $attendance->id,
             ];
         }
 
@@ -281,105 +270,88 @@ class AttendanceController extends Controller
      */
     public function show(int $id)
     {
-        $attendance = Attendance::with(['breaks'])
-            ->where('user_id', Auth::id()) // 他人の勤怠は見れないようにする
+        $attendance = Attendance::with([
+                'breaks' => fn ($q) => $q->orderBy('break_start_at'),
+            ])
+            ->where('user_id', Auth::id()) // 他人の勤怠は見れない
             ->findOrFail($id);
 
-        // URLパラメータでモード判定
-        $pendingMode  = request()->boolean('pending');   // ?pending=1
-        $approvedMode = request()->boolean('approved');  // ?approved=1
+        // 申請（承認待ち/承認済み）を取得（休憩も一緒に）
+        $pendingRequest = StampCorrectionRequest::with([
+                'stampCorrectionBreaks' => fn ($q) => $q->orderBy('break_start_at'),
+            ])
+            ->where('attendance_id', $attendance->id)
+            ->where('status', 0)
+            ->latest('id')
+            ->first();
 
-        // 申請レコード（pending or approved で取得先を変える）
-        $requestQuery = StampCorrectionRequest::with(['stampCorrectionBreaks'])
-            ->where('attendance_id', $attendance->id);
+        $approvedRequest = StampCorrectionRequest::with([
+                'stampCorrectionBreaks' => fn ($q) => $q->orderBy('break_start_at'),
+            ])
+            ->where('attendance_id', $attendance->id)
+            ->where('status', 1)
+            ->latest('id')
+            ->first();
 
-        $pendingRequest = null;
-        $approvedRequest = null;
+        $hasPending  = (bool) $pendingRequest;
+        $hasApproved = (bool) $approvedRequest;
 
-        if ($pendingMode) {
-            $pendingRequest = (clone $requestQuery)
-                ->where('status', 0)
-                ->latest('id')
-                ->first();
-        }
+        // 画面表示に使う「申請」は、承認待ちが最優先（なければ承認済み）
+        $displayRequest = $pendingRequest ?: $approvedRequest;
 
-        if ($approvedMode) {
-            $approvedRequest = (clone $requestQuery)
-                ->where('status', 1)
-                ->latest('id')
-                ->first();
-        }
-
-        // 画面に使う申請（優先順位：approvedMode → pendingMode → なし）
-        $activeRequest = $approvedRequest ?: $pendingRequest;
-
-        $isPending  = (bool) $pendingRequest;
-        $isApproved = (bool) $approvedRequest;
-
-        // 編集不可条件：承認待ち表示 or 承認済み表示
-        $isReadOnly = $isPending || $isApproved;
+        // ロックは「承認待ち」だけ（承認済みは編集OKにする運用）
+        $isReadOnly = $hasPending;
 
         // 出勤・退勤（申請があれば申請値、なければ勤怠値）
-        $clockInAt  = $activeRequest ? $activeRequest->requested_clock_in_at  : $attendance->clock_in_at;
-        $clockOutAt = $activeRequest ? $activeRequest->requested_clock_out_at : $attendance->clock_out_at;
+        $clockInAt  = $displayRequest?->requested_clock_in_at  ?? $attendance->clock_in_at;
+        $clockOutAt = $displayRequest?->requested_clock_out_at ?? $attendance->clock_out_at;
 
-        $clockInValue  = $clockInAt  ? Carbon::parse($clockInAt)->format('H:i')  : '';
+        $clockInValue  = $clockInAt  ? Carbon::parse($clockInAt)->format('H:i') : '';
         $clockOutValue = $clockOutAt ? Carbon::parse($clockOutAt)->format('H:i') : '';
 
-        // 備考：申請があれば reason、なければ attendance memo
-        $memoValue = $activeRequest
-            ? ($activeRequest->reason ?? '')
+        // 備考（申請があれば reason、なければ attendance memo）
+        $memoValue = $displayRequest
+            ? ($displayRequest->reason ?? '')
             : ($attendance->memo ?? '');
 
-        // 休憩：申請があれば stampCorrectionBreaks、なければ breaks
-        $displayBreaks = $activeRequest
-            ? ($activeRequest->stampCorrectionBreaks ?? collect())
+        // 休憩（申請があれば申請の休憩、なければ通常休憩）
+        $breakModels = $displayRequest
+            ? ($displayRequest->stampCorrectionBreaks ?? collect())
             : ($attendance->breaks ?? collect());
 
-        // BladeでCarbon使わないように「表示用配列」に変換
-        $breakRows = [];
-        foreach ($displayBreaks as $b) {
-            $breakRows[] = [
-                'start' => $b->break_start_at ? Carbon::parse($b->break_start_at)->format('H:i') : '',
-                'end'   => $b->break_end_at   ? Carbon::parse($b->break_end_at)->format('H:i')   : '',
-            ];
-        }
-        $breakRowsCount = count($breakRows) + 1; // 追加1行
+        // Bladeで扱いやすい配列にする（空は '' に統一）
+        $breakRows = $breakModels->map(function ($b) {
+            $start = $b->break_start_at ? Carbon::parse($b->break_start_at)->format('H:i') : '';
+            $end   = $b->break_end_at   ? Carbon::parse($b->break_end_at)->format('H:i') : '';
+            return ['start' => $start, 'end' => $end];
+        })->values()->toArray();
 
-        // 日付表示
-        $date = $attendance->clock_in_at
-            ? Carbon::parse($attendance->clock_in_at)
-            : Carbon::parse($attendance->created_at);
+        // UI用：常に「追加1行」＋「最低1行」
+        $breakRowsCount = max(1, count($breakRows) + 1);
 
+        // 日付表示（勤怠ベース）
+        $base = $attendance->clock_in_at ?? $attendance->created_at;
+        $date = Carbon::parse($base);
         $yearText = $date->format('Y年');
         $mdText   = $date->format('n月j日');
 
-        $user = Auth::user();
-
-        // ボタン表示（承認済みは「承認済み」にしたい）
-        $buttonLabel = $isApproved ? '承認済み' : '修正';
-
         return view('attendance.show', [
             'attendance' => $attendance,
-            'user' => $user,
+            'user' => Auth::user(),
 
-            // モード
-            'isPending' => $isPending,
-            'isApproved' => $isApproved,
+            'hasPending' => $hasPending,
+            'hasApproved' => $hasApproved,
             'isReadOnly' => $isReadOnly,
 
-            // 表示用確定値
             'clockInValue' => $clockInValue,
             'clockOutValue' => $clockOutValue,
             'memoValue' => $memoValue,
+
             'breakRows' => $breakRows,
             'breakRowsCount' => $breakRowsCount,
 
             'yearText' => $yearText,
             'mdText' => $mdText,
-
-            // ボタン
-            'buttonLabel' => $buttonLabel,
         ]);
     }
 

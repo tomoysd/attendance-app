@@ -5,24 +5,12 @@
 @endpush
 
 @section('content')
-@php
-// 承認待ち or 承認済み の詳細は編集不可にする
-// Controllerで $isReadOnly を作って渡す想定（無ければ保険で false）
-$isReadOnly = $isReadOnly ?? false;
-
-// disabled 属性（input/textarea に付ける）
-$disabled = $isReadOnly ? 'disabled' : '';
-
-// ボタン文言（Controllerで渡す想定。無ければデフォルト）
-$buttonLabel = $buttonLabel ?? '修正';
-@endphp
 
 <h1 class="att-detail-title">勤怠詳細</h1>
 
 @if (session('status'))
 <div class="alert alert-success">{{ session('status') }}</div>
 @endif
-
 
 
 {{-- エラー表示（要件：メッセージ表示） --}}
@@ -58,9 +46,9 @@ $buttonLabel = $buttonLabel ?? '修正';
                 <div class="att-row">
                     <div class="att-th">出勤・退勤</div>
                     <div class="att-td att-td--range">
-                        <input type="time" name="clock_in" value="{{ $clockInValue }}" class="att-time" {{ $disabled }}>
+                        <input type="time" name="clock_in" value="{{ $clockInValue }}" class="att-time" {{ $isReadOnly ? 'disabled' : '' }}>
                         <span class="att-range-tilde">〜</span>
-                        <input type="time" name="clock_out" value="{{ $clockOutValue }}" class="att-time" {{ $disabled }}>
+                        <input type="time" name="clock_out" value="{{ $clockOutValue }}" class="att-time" {{ $isReadOnly ? 'disabled' : '' }}>
                     </div>
                 </div>
 
@@ -76,9 +64,9 @@ $buttonLabel = $buttonLabel ?? '修正';
                     <div class="att-row">
                     <div class="att-th">{{ $label }}</div>
                     <div class="att-td att-td--range">
-                        <input type="time" name="break_start[]" value="{{ $bs }}" class="att-time" {{ $disabled }}>
+                        <input type="time" name="break_start[]" value="{{ $bs }}" class="att-time" {{ $isReadOnly ? 'disabled' : '' }}>
                         <span class="att-range-tilde">〜</span>
-                        <input type="time" name="break_end[]" value="{{ $be }}" class="att-time" {{ $disabled }}>
+                        <input type="time" name="break_end[]" value="{{ $be }}" class="att-time" {{ $isReadOnly ? 'disabled' : '' }}>
                     </div>
             </div>
             @endfor
@@ -86,14 +74,14 @@ $buttonLabel = $buttonLabel ?? '修正';
             <div class="att-row">
                 <div class="att-th">備考</div>
                 <div class="att-td att-td--memo">
-                    <textarea name="memo" class="att-memo" rows="3" {{ $disabled }}>{{ $memoValue }}</textarea>
+                    <textarea name="memo" class="att-memo" rows="3" {{ $isReadOnly ? 'disabled' : '' }}>{{ $memoValue }}</textarea>
                 </div>
             </div>
     </div>
 </div>
 </div>
-{{-- 承認待ちの注意文 --}}
-@if ($isPending)
+{{-- 承認待ちのメッセージ --}}
+@if ($hasPending)
 <div class="alert alert-warning">
     *承認待ちのため修正はできません。
 </div>
@@ -101,11 +89,8 @@ $buttonLabel = $buttonLabel ?? '修正';
 
 {{-- 承認待ちのときは「修正」ボタンを出さない --}}
 <div class="att-actions">
-    @if (!$isReadOnly)
-    <button type="submit" class="btn-fix">修正</button>
-    @else
-    {{-- クリック不可の見た目ボタン（CSSはbtn-fixを流用） --}}
-    <button type="button" class="btn-fix" disabled>{{ $buttonLabel }}</button>
+    @if (!$hasPending)
+        <button type="submit" class="btn-fix">修正</button>
     @endif
 </div>
 </form>

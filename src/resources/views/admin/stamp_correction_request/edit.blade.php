@@ -118,7 +118,7 @@ return [
 
         <div class="att-actions">
             @if($request->status === 1)
-            <button type="button" class="btn-fix" disabled>承認済み</button>
+            <button type="button" class="btn-fix btn-approved" disabled>承認済み</button>
             @else
             <button type="submit" class="btn-fix">承認</button>
             @endif

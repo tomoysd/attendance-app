@@ -47,7 +47,7 @@
                 <tbody>
                     @forelse($requests as $req)
                     @php
-                    $statusText = $req->status_label ?? ($isPendingTab ? '承認待ち' : '承認済み');
+                    $statusText = $isPendingTab ? '承認待ち' : '承認済み';
 
                     // 「対象日時」= 勤怠の日付（attendanceのclock_in_at想定）
                     $targetSource = optional($req->attendance)->clock_in_at

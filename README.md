@@ -3,7 +3,7 @@
 ## 環境構築
 
 ### Dockerビルド　
-1. git clone 
+1. git clone git@github.com/tomoysd/attendance-app.git
 2. docker-compose up -d --build 
 3. mysql:
     platform: linux/x86_64
@@ -41,9 +41,6 @@ php artisan migrate
 7. シーディングの実行
 php artisan db:seed
 
-8. Stripeの設定STRIPE_PUBLIC_KEY=
-STRIPE_SECRET_KEY= 
-※Stripeのサイトから、APIキーを取得してください
 
 
 
@@ -68,4 +65,25 @@ STRIPE_SECRET_KEY=
 - phpMyAdmin: http://localhost:8080/ 
 - mailhog: http://localhost:8025/
 
+
+##　テストアカウント
+|name|email|password|
+|---|---|---|
+|一般ユーザー|general1@gemail.com|password|
+|一般ユーザー|general2@gmail.com|password|
+
+
+## PHPUnitを利用したテストに関して
+```
+//テスト用データベースの作成
+docker-compose exec mysql bash
+mysql -u root -p
+//パスワードはrootと入力
+create database test_database;
+
+docker-compose exec php bash
+php artisan migrate:fresh --env=testing
+./vendor/bin/phpunit
+
+```
 

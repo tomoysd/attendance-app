@@ -11,16 +11,15 @@
 <h1 class="att-detail-title">勤怠詳細</h1>
 
 
-
 {{-- 成功メッセージ --}}
 @if (session('success'))
 <div class="alert alert-success">{{ session('success') }}</div>
 @endif
 
-{{-- ロックメッセージは $isLocked のみに統一 --}}
-@if ($isLocked)
+{{-- ✅ 承認待ちメッセージは「承認待ちのときだけ」 --}}
+@if ($hasPending)
 <div class="alert alert-warning-top">
-    承認待ちのため修正はできません。
+    *承認待ちのため修正はできません。
 </div>
 @endif
 
@@ -37,11 +36,11 @@
 
 <div class="att-detail-page">
     <div class="att-detail-card">
-        @if (!$isLocked)
+
         <form method="POST" action="{{ route('admin.attendance.update', ['id' => $attendance->id]) }}">
             @csrf
             @method('PATCH')
-        @endif
+
 
             <div class="att-table">
                 {{-- 名前 --}}
@@ -69,7 +68,7 @@
                             name="clock_in"
                             value="{{ old('clock_in', $clockIn) }}"
                             class="att-time"
-                           {{ $isLocked ? 'disabled' : '' }}>
+                            {{ $isLocked ? 'disabled' : '' }}>
 
                         <span class="att-range-tilde">〜</span>
 
@@ -128,10 +127,17 @@
 {{-- ✅ 修正ボタンは編集できる時だけ表示 --}}
 @if(!$isLocked)
 <div class="att-actions">
-    <button type="submit" class="btn-fix" @disabled($isLocked)>修正</button>
+    <button type="submit" class="btn-fix">修正</button>
 </div>
-</form>
 @endif
+
+{{-- ✅ 承認済みバッジ --}}
+@if($hasApproved)
+<div class="att-actions">
+    <span class="btn-approved">承認済み</span>
+</div>
+@endif
+</form>
 
 
 @endsection
