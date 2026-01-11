@@ -60,13 +60,9 @@ php artisan db:seed
 ![ER図はこちら (table.drawio)](src/table.png)
 
 
-## URL 
-- 開発環境: http://localhost/ 
-- phpMyAdmin: http://localhost:8080/ 
-- mailhog: http://localhost:8025/
-
 
 ## テストアカウント
+
 |name|email|password|
 |---|---|---|
 |管理者|admin@example.com|password|
@@ -87,3 +83,7 @@ php artisan migrate:fresh --env=testing
 
 ```
 
+## URL 
+- 開発環境: http://localhost/ 
+- phpMyAdmin: http://localhost:8080/ 
+- mailhog: http://localhost:8025/
