@@ -69,8 +69,8 @@ php artisan db:seed
 ##　テストアカウント
 |name|email|password|
 |---|---|---|
-|一般ユーザー|general1@gemail.com|password|
-|一般ユーザー|general2@gmail.com|password|
+|管理者|admin@example.com|password|
+|一般ユーザー|reina.n@coachtech.com|password|
 
 
 ## PHPUnitを利用したテストに関して
