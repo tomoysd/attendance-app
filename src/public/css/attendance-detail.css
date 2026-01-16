@@ -190,7 +190,7 @@
     padding-left: 104px;
 }
 
-/* （任意）スマホで溢れるなら幅を縮める */
+/* スマホで溢れるなら幅を縮める */
 @media (max-width: 480px) {
     .att-table {
         --time-w: 120px;

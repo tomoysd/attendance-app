@@ -98,7 +98,6 @@ class AttendanceController extends Controller
         $pendingRequest = $attendance->stampCorrectionRequests()
             ->where('status', 0)
             ->latest('created_at')
-            // ↓ 申請側に休憩のリレーションがあるなら読み込む
             ->with(['stampCorrectionBreaks' => fn($q) => $q->orderBy('break_start_at')])
             ->first();
 
@@ -132,7 +131,7 @@ class AttendanceController extends Controller
             $clockOut = $activeRequest->requested_clock_out_at ? Carbon::parse($activeRequest->requested_clock_out_at)->format('H:i') : '';
             $memo     = $activeRequest->reason ?? '';
 
-            // 申請側の休憩（リレーション名 breaks は要調整の可能性あり）
+            // 申請側の休憩
             $breakRows = collect($activeRequest->stampCorrectionBreaks ?? [])->map(function ($b) {
                 return [
                     'id'    => $b->id,
@@ -332,7 +331,7 @@ class AttendanceController extends Controller
         return response()->streamDownload(function () use ($start, $end, $attendances) {
             $out = fopen('php://output', 'w');
 
-            // Excel文字化け対策（必要なら）
+            // Excel文字化け対策
             fwrite($out, "\xEF\xBB\xBF");
 
             fputcsv($out, ['日付', '出勤', '退勤', '休憩', '合計']);

@@ -46,10 +46,7 @@
     font-size: 20px;
     color: #000;
 }
-/* .admin-attendance__date-icon {
-    display: inline-block;
-    transform: translateY(1px);
-} */
+
 .admin-attendance__table-wrap {
     background: #fff;
     border-radius: 10px;

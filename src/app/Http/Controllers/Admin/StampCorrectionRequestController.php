@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-// use App\Http\Requests\AttendanceRequest; // 承認時に勤怠を更新するなら後で使う
 use Illuminate\Http\Request;
 use App\Models\StampCorrectionRequest;
 use Illuminate\Support\Facades\Auth;
@@ -18,13 +17,13 @@ class StampCorrectionRequestController extends Controller
     {
         // 承認待ち（未承認）
         $pendingRequests = StampCorrectionRequest::with(['attendance.user'])
-            ->where('status', 0) // 0: 承認待ち（※あなたの設計に合わせて必要なら変更）
+            ->where('status', 0) // 0: 承認待ち
             ->orderByDesc('created_at')
             ->get();
 
         // 承認済み
         $approvedRequests = StampCorrectionRequest::with(['attendance.user'])
-            ->where('status', 1) // 1: 承認済み（※あなたの設計に合わせて必要なら変更）
+            ->where('status', 1) // 1: 承認済み
             ->orderByDesc('approved_at')
             ->orderByDesc('created_at')
             ->get();

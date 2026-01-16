@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-// use App\Http\Requests\AttendanceRequest;
 use App\Http\Requests\AttendanceCorrectionRequest;
 use Illuminate\Http\Request;
 use App\Models\Attendance;

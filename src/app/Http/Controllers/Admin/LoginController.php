@@ -21,7 +21,7 @@ class LoginController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-            // ★ここがB方式の肝：roleがadminじゃなければ弾く
+            // roleがadminじゃなければ弾く
             if (Auth::user()->role !== 'admin') {
                 Auth::logout();
                 return back()
