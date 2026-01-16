@@ -61,7 +61,7 @@ class AttendanceController extends Controller
      */
     public function store(Request $request)
     {
-        // TODO: AttendanceRequest でバリデーション
+        //  AttendanceRequest でバリデーション
         $request->validate([
             'action' => ['required', 'in:clock_in,clock_out,break_start,break_end'],
         ]);

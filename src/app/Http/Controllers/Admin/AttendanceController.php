@@ -245,7 +245,7 @@ class AttendanceController extends Controller
      */
     public function staff(Request $request, int $id)
     {
-        // TODO: 対象ユーザーと、そのユーザーの勤怠一覧を取得
+        //  対象ユーザーと、そのユーザーの勤怠一覧を取得
         $user = User::where('role', 'general')->findOrFail($id);
 
         $month = $request->query('month');

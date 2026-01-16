@@ -36,7 +36,7 @@ class StampCorrectionRequestController extends Controller
      */
     public function edit(int $attendance_correct_request_id)
     {
-        // TODO: 対象申請を取得
+        //  対象申請を取得
         $request = StampCorrectionRequest::with([
             'attendance.user',
             'attendance.breaks',

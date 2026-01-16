@@ -25,10 +25,10 @@ class RegisterController extends Controller
      */
     public function store(RegisterRequest $request)
     {
-        // TODO: RegisterRequest に差し替えてバリデーション
+        //  RegisterRequest に差し替えてバリデーション
         $request->validated();
 
-        // TODO: ユーザー作成処理
+        //  ユーザー作成処理
         $user = User::create([
             'name'     => $request->name,
             'email'    => $request->email,
@@ -40,7 +40,7 @@ class RegisterController extends Controller
         // 登録直後にログイン
         Auth::login($user);
 
-        // TODO: ログインさせて、勤怠画面
+        //  ログインさせて、勤怠画面
         return redirect()->route('attendance.create');
     }
 }

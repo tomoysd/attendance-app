@@ -12,7 +12,7 @@ class StaffController extends Controller
      */
     public function index()
     {
-        // TODO: 一般ユーザーだけ取得（role = general）
+        //  一般ユーザーだけ取得（role = general）
         $users = User::where('role', 'general')
             ->orderBy('id' , 'asc')
             ->get();

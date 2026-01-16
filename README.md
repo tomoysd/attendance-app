@@ -75,7 +75,7 @@ php artisan db:seed
 docker-compose exec mysql bash
 mysql -u root -p
 //パスワードはrootと入力
-create database test_database;
+create database attendance_test;
 
 docker-compose exec php bash
 php artisan migrate:fresh --env=testing
